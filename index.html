@@ -1,0 +1,94 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script src="https://d3js.org/d3.v5.js"></script>
+    </head>
+
+    <body>
+      <div style="text-align: center;">
+        <h1>
+          <span style="color:#FF0000" id="course"></span>
+          <span id="courseName"></span>
+          <br/>
+          <span id="releaseYear"></span>
+        </h1>
+      </div>
+
+      Course Active : <input id="courseActive" type="checkbox"  disabled >
+      <br>
+      Number of dropped Student: <span id="droppedStudents" ></span>
+      <br>
+      date : <span id="date" ></span>
+      <br>
+      <br>
+      <b>Some Data:</b>
+      <div id="somedataid"></div>
+
+    </body>
+</html>
+
+
+
+
+<script type="text/javascript">
+  //REQUEST THE URL
+  function httpGet(theUrl)
+  {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", theUrl, false ); 
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
+  }
+  data =JSON.parse(httpGet("https://4v9r83qfo4.execute-api.eu-central-1.amazonaws.com/dev"));
+  document.getElementById("course").innerHTML=data.course + ": " ;
+  document.getElementById("courseName").innerHTML=data.courseName;
+  document.getElementById("releaseYear").innerHTML=data.releaseYear;
+
+  if(data.courseActive){
+    document.getElementById("courseActive").checked = true;
+  }
+  else{
+
+  }
+  if(data.droppedStudent == null){
+    document.getElementById("droppedStudents").innerHTML = 0;
+  }
+  else{
+    document.getElementById("droppedStudents").innerHTML = data.droppedStudents;
+  }
+  temp = (data.date).toString();
+  year= temp.substr(0,4);
+  month=temp.substr(4,2);
+  day=temp.substr(6,2);
+  document.getElementById("date").innerHTML = year+"-"+month+"-"+day;
+
+  var svg = d3.select("#somedataid")
+              .append("svg")
+              .attr("width", 300)
+              .attr("height", 300)
+              .style('background-color', 'lightgrey')
+  for( i in data.someData){
+    console.log(data.someData[i][0])
+    svg.append("circle")
+                .attr("cx", (300 / 50)* data.someData[i][0])
+                .attr("cy",  (300/10) * data.someData[i][1])
+                .attr("r", 5);
+  }
+  var xScale = d3.scaleLinear()
+                .domain([0, 50]) 
+                .range([0, 300]);
+
+  // Y Scale
+  var yScale = d3.scaleLinear()
+    			      .domain([0, 10]) 
+    			      .range([300, 0]);
+
+  svg.append('g')
+  .attr('transform', 'translate(0, 280)')
+  .call(d3.axisBottom(xScale));
+
+  svg.append('g')
+  .attr('transform', 'translate(20, 0)')
+  .call(d3.axisLeft(yScale));
+
+</script>
